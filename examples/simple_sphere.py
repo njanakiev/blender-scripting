@@ -10,26 +10,25 @@ def getScriptFolder():
 		folder = os.path.dirname(os.path.abspath(__file__))
 	else:
 		folder = os.path.dirname(bpy.context.space_data.text.filepath)
-		
 	return folder
 
-def createSmoothSphere(origin=(0,0,0)):
+def createSphere(origin=(0,0,0)):
 	# Create icosphere
 	bpy.ops.mesh.primitive_ico_sphere_add(location=origin)
 	obj = bpy.context.object
-	
+	return obj
+
+def setSmooth(obj, level=2, smooth=True):
 	# Add subsurf modifier
 	modifier = obj.modifiers.new('Subsurf', 'SUBSURF')
-	modifier.levels = 2
-	modifier.render_levels = 3
+	modifier.levels = level
+	modifier.render_levels = level
 	
 	# Smooth surface
 	mesh = obj.data
 	for p in mesh.polygons:
-		p.use_smooth = True
+		p.use_smooth = smooth	
 	
-	return obj
-
 def createMaterial(name):
 	mat = bpy.data.materials.new(name)
 	
@@ -43,14 +42,12 @@ def createMaterial(name):
 	mat.specular_shader = 'COOKTORR'
 	mat.specular_intensity = 0.8
 	mat.specular_hardness = 100
-	
 	return mat
     
-def createLampArray():
-	n = 100
+def rainbowLights(r=5, n=100, energy=0.1, f=2):
 	for i in range(n):
 		t = float(i)/float(n)
-		pos = (5*sin(tau*t), 5*cos(tau*t), 5*sin(2*tau*t))
+		pos = (r*sin(tau*t), r*cos(tau*t), r*sin(f*tau*t))
 		
 		# Create lamp
 		bpy.ops.object.add(type='LAMP', location=pos)
@@ -61,7 +58,7 @@ def createLampArray():
 		c = Color()
 		c.hsv = (t, 0.6, 1)
 		obj.data.color = c
-		obj.data.energy = 0.1
+		obj.data.energy = energy
 
 def removeAll(type):
 	# Possible type: ‘MESH’, ‘CURVE’, ‘SURFACE’, ‘META’, ‘FONT’, ‘ARMATURE’, ‘LATTICE’, ‘EMPTY’, ‘CAMERA’, ‘LAMP’
@@ -89,18 +86,17 @@ bpy.context.scene.camera = cam
 bpy.context.scene.cursor_location = (0,0,0)
 
 # Create lamps
-createLampArray()
+rainbowLights()
 
 # Create object and its material
-sphere = createSmoothSphere()
+sphere = createSphere()
+setSmooth(sphere, 3)
 mat = createMaterial('Mat')
 if sphere.data.materials: sphere.data.materials[0] = mat
 else: sphere.data.materials.append(mat)
 
 # Specify folder to save rendering
 render_folder = os.path.join(cwd, 'rendering')
-
-# Create folder if it does not exist
 if(not os.path.exists(render_folder)):
 	os.mkdir(render_folder)
 
