@@ -20,11 +20,13 @@ Another option is to open the script in Blender and run the script there which i
 
 ## Simple Sphere
 
+[simple_sphere.py](examples/simple_sphere.py) Simple rendering of a smooth sphere
+
 ![Simple Sphere](/img/simple_sphere.png)
 
 ## Parametric Torus
 
-The [torus](https://en.wikipedia.org/wiki/Torus) is created with the following parameterization 
+[parametric_torus.py](examples/parametric_torus.py) Parametric generation of a torus. The [torus](https://en.wikipedia.org/wiki/Torus) is created with the following parameterization 
 
 ![Torus Formula](/img/torus_formula.png)
 
