@@ -17,6 +17,7 @@ Another option is to open the script in Blender and run the script there which i
 
 - [Blender Cookbook](https://wiki.blender.org/index.php/Dev:Py/Scripts/Cookbook)
 - [Blender 3D Python Scripting](https://en.wikibooks.org/wiki/Blender_3D:_Noob_to_Pro/Advanced_Tutorials/Python_Scripting/Introduction)
+- [Blender Scripting Blog](http://blenderscripting.blogspot.co.at/)
 
 ## Simple Sphere
 
@@ -30,6 +31,12 @@ Another option is to open the script in Blender and run the script there which i
 
 ![Torus Formula](/img/torus_formula.png)
 
-This is done by creating a grid of u, v values between 0 and 1
+where the values u, v are between 0 and 1
 
 ![Parametric Torus](/img/parametric_torus.png)
+
+## Metaballs
+
+[metaballs.py](examples/metaballs.py) Generate metaballs in Blender inspired by this [tutorial](http://blenderscripting.blogspot.co.at/2012/09/tripping-metaballs-python.html).
+
+![Metaballs](/img/metaballs.png)
