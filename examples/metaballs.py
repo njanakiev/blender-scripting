@@ -1,18 +1,17 @@
 import bpy
-import os
-import sys
 import random
 from mathutils import Vector
 
+# Check if script is opened in Blender program
+import os, sys
+if(bpy.context.space_data == None):
+	cwd = os.path.dirname(os.path.abspath(__file__))
+else: 
+	cwd = os.path.dirname(bpy.context.space_data.text.filepath)	
+# Get folder of script and add current working directory to path
+sys.path.append(cwd)
+import utils
 
-
-def getScriptFolder():
-	# Check if script is opened in Blender program
-	if(bpy.context.space_data == None):
-		folder = os.path.dirname(os.path.abspath(__file__))
-	else:
-		folder = os.path.dirname(bpy.context.space_data.text.filepath)	
-	return folder
 	
 def createMetaball(origin=(0,0,0), n=30, r0=4, r1=2.5):
 	metaball = bpy.data.metaballs.new('MetaBall')
@@ -32,12 +31,6 @@ def createMetaball(origin=(0,0,0), n=30, r0=4, r1=2.5):
 	return metaball
 	
 
-	
-# Get folder of script and add current working directory to path
-cwd = getScriptFolder()
-sys.path.append(cwd)
-import utils
-	
 # Remove all elements
 utils.removeAll()
 

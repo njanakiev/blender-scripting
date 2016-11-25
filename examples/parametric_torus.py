@@ -1,21 +1,29 @@
 import bpy
-import os
-import sys
 from math import sin, cos, pi
 tau = 2*pi
 
+# Check if script is opened in Blender program
+import os, sys
+if(bpy.context.space_data == None):
+	cwd = os.path.dirname(os.path.abspath(__file__))
+else: 
+	cwd = os.path.dirname(bpy.context.space_data.text.filepath)	
+# Get folder of script and add current working directory to path
+sys.path.append(cwd)
+import utils
 
 
-def getScriptFolder():
-	# Check if script is opened in Blender program
-	if(bpy.context.space_data == None):
-		folder = os.path.dirname(os.path.abspath(__file__))
-	else:
-		folder = os.path.dirname(bpy.context.space_data.text.filepath)	
-	return folder
+# Create a function for the u, v surface parameterization from r0 and r1
+def torusSurface(r0, r1):
+	def surface(u, v):
+		point = ((r0 + r1*cos(tau*v))*cos(tau*u), \
+				 (r0 + r1*cos(tau*v))*sin(tau*u), \
+				  r1*sin(tau*v))
+		return point
+	return surface
 
-	
-def createTorus(r0, r1, n=10, m=10, name='Torus', origin=(0,0,0)):
+# Create an object from a surface parameterization
+def createSurface(surface, n=10, m=10, origin=(0,0,0), name='Surface'):
 	verts = list()
 	faces = list()
 	
@@ -25,10 +33,8 @@ def createTorus(r0, r1, n=10, m=10, name='Torus', origin=(0,0,0)):
 			u = row/n 
 			v = col/m
 			
-			# Create surface
-			point = ((r0 + r1*cos(tau*v))*cos(tau*u), \
-					 (r0 + r1*cos(tau*v))*sin(tau*u), \
-					  r1*sin(tau*v))
+			# Surface parameterization
+			point = surface(u, v)
 			verts.append(point)
 			
 			# Connect first and last vertices on the u and v axis
@@ -52,12 +58,6 @@ def createTorus(r0, r1, n=10, m=10, name='Torus', origin=(0,0,0)):
 	mesh.update(calc_edges=True)
 	return obj
 
-
-	
-# Get folder of script and add current working directory to path
-cwd = getScriptFolder()
-sys.path.append(cwd)
-import utils
 	
 # Remove all elements
 utils.removeAll()
@@ -73,8 +73,8 @@ bpy.context.scene.cursor_location = (0,0,0)
 utils.rainbowLights(10, 300, 3)
 
 # Create object
-torus = createTorus(4, 2, 20, 20)
-utils.setSmooth(torus)
+torus = createSurface(torusSurface(4, 2), 20, 20)
+utils.setSmooth(torus, 2)
 
 # Specify folder to save rendering
 render_folder = os.path.join(cwd, 'rendering')
