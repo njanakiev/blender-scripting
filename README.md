@@ -21,18 +21,22 @@ Another option is to open the script in Blender and run the script inside Blende
 
 ## Utils
 
-[utils.py](examples/utils.py) are some frequently used functions in blender, which will be used in most of the examples.
+[utils.py](examples/utils.py) 
+
+Some frequently used functions in blender, which will be used in most of the examples.
 
 ## Simple Sphere
 
-[simple_sphere.py](examples/simple_sphere.py) Simple rendering of a smooth sphere. First an icosphere is added with
+[simple_sphere.py](examples/simple_sphere.py) 
+
+Simple rendering of a smooth sphere. First an icosphere is added with
 
 ```
 bpy.ops.mesh.primitive_ico_sphere_add(location=(0, 0, 0))
 obj = bpy.context.object
 ```
 
-Then the subdevision surface modifier is added to the object to increase the resolution of the mesh and afterwards all the faces of the object are set to a smooth shading
+Then the subdivision surface modifier is added to the object to increase the resolution of the mesh and afterwards all the faces of the object are set to a smooth shading
 
 ```
 modifier = obj.modifiers.new('Subsurf', 'SUBSURF')
@@ -41,7 +45,7 @@ modifier.render_levels = 2
 
 mesh = obj.data
 for p in mesh.polygons:
-	p.use_smooth = smooth
+	p.use_smooth = True
 ```
 
 Alternatively the icosphere can be subdivided with the `subdivisions` argument in the function
@@ -60,7 +64,7 @@ Parametric generation of a torus. The [torus](https://en.wikipedia.org/wiki/Toru
 
 ![Torus Formula](/img/torus_formula.png)
 
-where the values u, v are between 0 and 1 and are then mapped to x, y, z coordinates with the parameterization. In the example the function `torusSurface(r0, r1)` returns this surface parameterization function which is then used in `createSurface(surface, n, m)`, which creates the object from a n by m grid. The function `createSurface(surface, n, m)` can be also used for other parameterizations such as [surfaces of revolution](https://en.wikipedia.org/wiki/Surface_of_revolution) or other [parametric surfaces](https://en.wikipedia.org/wiki/Parametric_surface), which need to be translated into function.
+where the values u, v are between 0 and 1 and are then mapped to x, y, z coordinates. In [parametric_torus.py](examples/parametric_torus.py), the function `torusSurface(r0, r1)` returns the surface parameterization function for a torus which is then used in `createSurface(surface, n, m)` as the first argument, which creates the object from a n by m grid. The function `createSurface(surface, n, m)` can be also used for other parameterizations such as [surfaces of revolution](https://en.wikipedia.org/wiki/Surface_of_revolution) or other [parametric surfaces](https://en.wikipedia.org/wiki/Parametric_surface).
 
 ![Parametric Torus](/img/parametric_torus.png)
 

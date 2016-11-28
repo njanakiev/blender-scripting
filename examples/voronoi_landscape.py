@@ -56,6 +56,7 @@ for face in faces:
 	bmesh.ops.scale(bm, vec=Vector((0.8, 0.8, 0.8)), verts=f.verts, space=Matrix.Translation(-center))
 
 # Convert hsv values to gamma corrected rgb values
+# Based on: http://stackoverflow.com/questions/17910543/convert-gamma-rgb-curves-to-rgb-curves-with-no-gamma/
 def convert_hsv(hsv):
 	return tuple(pow(val, 2.2) for val in colorsys.hsv_to_rgb(*hsv))
 	
