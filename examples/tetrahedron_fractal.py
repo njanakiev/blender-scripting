@@ -16,10 +16,10 @@ sys.path.append(cwd)
 import utils
 
 
-def tetrahedronPoints(r=1, origin=(0, 0, 0), matrix=Matrix.Identity(3)):
+def tetrahedronPoints(r=1, origin=(0, 0, 0)):
 	origin = Vector(origin)
 	
-	# http://mathworld.wolfram.com/RegularTetrahedron.html
+	# Formulas from http://mathworld.wolfram.com/RegularTetrahedron.html
 	a = 4*r/sqrt(6)
 	h = a*sqrt(6)/3
 	points = [( sqrt(3)*a/3,  0, -r/3), \
@@ -27,7 +27,7 @@ def tetrahedronPoints(r=1, origin=(0, 0, 0), matrix=Matrix.Identity(3)):
 			  (-sqrt(3)*a/6,  0.5*a, -r/3), \
 			  (0, 0, sqrt(6)*a/3 - r/3)]
 	
-	points = [matrix*Vector(p) + origin for p in points]
+	points = [Vector(p) + origin for p in points]
 	return points
 	
 
@@ -97,5 +97,5 @@ rnd = bpy.data.scenes['Scene'].render
 rnd.resolution_x = 500
 rnd.resolution_y = 500
 rnd.resolution_percentage = 100
-rnd.filepath = os.path.join(render_folder, 'fractal_tetrahedron.png')
+rnd.filepath = os.path.join(render_folder, 'tetrahedron_fractal.png')
 bpy.ops.render.render(write_still=True)

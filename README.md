@@ -31,14 +31,14 @@ Some frequently used functions in blender, which will be used in most of the exa
 
 Simple rendering of a smooth sphere. First an icosphere is added with
 
-```
+```python
 bpy.ops.mesh.primitive_ico_sphere_add(location=(0, 0, 0))
 obj = bpy.context.object
 ```
 
 Then the subdivision surface modifier is added to the object to increase the resolution of the mesh and afterwards all the faces of the object are set to a smooth shading
 
-```
+```python
 modifier = obj.modifiers.new('Subsurf', 'SUBSURF')
 modifier.levels = 2
 modifier.render_levels = 2
@@ -50,7 +50,7 @@ for p in mesh.polygons:
 
 Alternatively the icosphere can be subdivided with the `subdivisions` argument in the function
 
-```
+```python
 bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4, location=(0, 0, 0))
 ```
 
@@ -76,10 +76,33 @@ Generate random metaballs in Blender inspired by this [tutorial](http://blenders
 
 ![Metaballs](/img/metaballs.png)
 
-## Voronoi landscape
+## Voronoi Landscape
 
 [voronoi_landscape.py](examples/voronoi_landscape.py)
 
-This is a more advanced example for using a [Voronoi diagram](https://en.wikipedia.org/wiki/Voronoi_diagram) in Blender and Python. The Voronoi diagram is implemented with the module `scipy.spatial` which can be added with [Scipy](https://www.scipy.org/), or can be found in the Python distribution [Anaconda](https://www.continuum.io/downloads). The steps to use Anaconda as the Interpreter in Blender 2.77 are shown in this [solution](http://blender.stackexchange.com/questions/51067/using-anaconda-python-3-in-blender-winx64).
+This is a more advanced example for using a [Voronoi diagram](https://en.wikipedia.org/wiki/Voronoi_diagram). The Voronoi diagram is implemented with the module `scipy.spatial` which can be added with [Scipy](https://www.scipy.org/), or can be found in the Python distribution [Anaconda](https://www.continuum.io/downloads). The steps to use Anaconda as the Interpreter in Blender 2.77 are shown in this [solution](http://blender.stackexchange.com/questions/51067/using-anaconda-python-3-in-blender-winx64).
 
 ![Voronoi Landscape](/img/vornoi_landscape.png)
+
+## Tetrahedron Fractal
+
+[tetrahedron_fractal.py](examples/tetrahedron_fractal.py)
+
+This is an example for a fractal [tetrahedron](http://mathworld.wolfram.com/RegularTetrahedron.html), where each tetrahedron is subdivided into smaller pieces with a recursive function. In order to create a material for the tetrahedron the material is assigned as shown here:
+
+```python
+color = (0.5, 0.5, 0.5)
+mat = bpy.data.materials.new('Material')
+	
+# Diffuse
+mat.diffuse_shader = 'LAMBERT'
+mat.diffuse_intensity = 0.9
+mat.diffuse_color = color
+	
+# Specular
+mat.specular_intensity = 0
+
+obj.data.materials.append(mat)
+```
+
+![Tetrahedron Fractal](/img/tetrahedron_fractal.png)
