@@ -77,8 +77,11 @@ def rainbowLights(r=5, n=100, freq=2, energy=0.1):
 		obj = bpy.context.object
 		obj.data.type = 'POINT'
 		
+		# Apply gamma correction for Blender
+		color = tuple(pow(float(c) for c in colorsys.hsv_to_rgb(t, 0.6, 1)))
+		
 		# Set HSV color and lamp energy
-		obj.data.color = colorsys.hsv_to_rgb(t, 0.6, 1)
+		obj.data.color = color
 		obj.data.energy = energy
 
 def removeAll(type=None):
@@ -91,3 +94,19 @@ def removeAll(type=None):
 		# Remove all elements in scene
 		bpy.ops.object.select_by_layer()
 		bpy.ops.object.delete(use_global=False)
+
+def simpleMaterial(diffuse_color):
+	mat = bpy.data.materials.new('Material')
+	
+	# Diffuse
+	mat.diffuse_shader = 'LAMBERT'
+	mat.diffuse_intensity = 0.9
+	mat.diffuse_color = diffuse_color
+	
+	# Specular
+	mat.specular_intensity = 0
+	
+	return mat
+		
+def colorRGB_256(color):
+	return tuple(pow(float(c)/255.0, 2.2) for c in color)
