@@ -1,4 +1,4 @@
-# blender-scripting-intro
+# blender-scripting
 This is a simple introduction to scripting in [Blender](https://www.blender.org/) with Python.
 
 ## Requirements
