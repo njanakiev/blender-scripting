@@ -133,5 +133,28 @@ def simpleMaterial(diffuse_color):
     return mat
 
 
+def falloffMaterial(diffuse_color):
+    mat = bpy.data.materials.new('FalloffMaterial')
+
+    # Diffuse
+    mat.diffuse_shader = 'LAMBERT'
+    mat.use_diffuse_ramp = True
+    mat.diffuse_ramp_input = 'NORMAL'
+    mat.diffuse_ramp_blend = 'ADD'
+    mat.diffuse_ramp.elements[0].color = (1, 1, 1, 1)
+    mat.diffuse_ramp.elements[1].color = (1, 1, 1, 0)
+    mat.diffuse_color = diffuse_color
+    mat.diffuse_intensity = 1.0
+
+    # Specular
+    mat.specular_intensity = 0.0
+
+    # Shading
+    mat.emit = 0.05
+    mat.translucency = 0.2
+
+    return mat
+
+
 def colorRGB_256(color):
     return tuple(pow(float(c)/255.0, 2.2) for c in color)
