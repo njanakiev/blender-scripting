@@ -1,24 +1,15 @@
 import bpy
 from math import sin, cos, pi
-tau = 2*pi
-
-# Check if script is opened in Blender program
-import os, sys
-if(bpy.context.space_data == None):
-    cwd = os.path.dirname(os.path.abspath(__file__))
-else:
-    cwd = os.path.dirname(bpy.context.space_data.text.filepath)
-# Get folder of script and add current working directory to path
-sys.path.append(cwd)
+TAU = 2*pi
 import utils
 
 
 # Create a function for the u, v surface parameterization from r0 and r1
 def torusSurface(r0, r1):
     def surface(u, v):
-        point = ((r0 + r1*cos(tau*v))*cos(tau*u), \
-                 (r0 + r1*cos(tau*v))*sin(tau*u), \
-                  r1*sin(tau*v))
+        point = ((r0 + r1*cos(TAU*v))*cos(TAU*u), \
+                 (r0 + r1*cos(TAU*v))*sin(TAU*u), \
+                  r1*sin(TAU*v))
         return point
     return surface
 

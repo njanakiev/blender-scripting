@@ -5,19 +5,20 @@ import colorsys
 
 
 def trackToConstraint(obj, name, target):
-    cns = obj.constraints.new('TRACK_TO')
-    cns.name = name
-    cns.target = target
-    cns.track_axis = 'TRACK_NEGATIVE_Z'
-    cns.up_axis = 'UP_Y'
-    cns.owner_space = 'LOCAL'
-    cns.target_space = 'LOCAL'
+    constraint = obj.constraints.new('TRACK_TO')
+    constraint.name = name
+    constraint.target = target
+    constraint.track_axis = 'TRACK_NEGATIVE_Z'
+    constraint.up_axis = 'UP_Y'
+    constraint.owner_space = 'LOCAL'
+    constraint.target_space = 'LOCAL'
 
 
 def target(origin=(0,0,0)):
-    bpy.ops.object.add(type='EMPTY', location=origin) # Create target empty
-    target = bpy.context.object
-    target.name = 'Target'
+    target = bpy.data.objects.new('Target', None)
+    bpy.context.scene.objects.link(target)
+    target.location = origin
+
     return target
 
 
@@ -28,7 +29,7 @@ def camera(origin, target=None, lens=35, clip_start=0.1, clip_end=200, type='PER
     camera.clip_start = clip_start
     camera.clip_end = clip_end
     camera.type = type # 'PERSP', 'ORTHO', 'PANO'
-    if(type == 'ORTHO'):
+    if type == 'ORTHO':
         camera.ortho_scale = ortho_scale
 
     # Link object to scene
@@ -37,7 +38,7 @@ def camera(origin, target=None, lens=35, clip_start=0.1, clip_end=200, type='PER
     bpy.context.scene.objects.link(obj)
     bpy.context.scene.camera = obj # Make this the current camera
 
-    if(target): trackToConstraint(obj, 'TrackConstraint', target)
+    if target: trackToConstraint(obj, 'TrackConstraint', target)
     return obj
 
 
@@ -50,7 +51,7 @@ def lamp(origin, type='POINT', energy=1, color=(1,1,1), target=None):
     obj.data.energy = energy
     obj.data.color = color
 
-    if(target): trackToConstraint(obj, 'TrackConstraint', target)
+    if target: trackToConstraint(obj, 'TrackConstraint', target)
     return obj
 
 
@@ -69,7 +70,7 @@ def simpleScene(targetCoord, cameraCoord, sunCoord, lens=35):
     return target, cam, sun
 
 
-def setAmbientOcclusion(ambient_occulusion=True, samples=5, blend_type = 'ADD'):
+def setAmbientOcclusion(ambient_occulusion=True, samples=5, blend_type='ADD'):
     # blend_type options: 'ADD', 'MULTIPLY'
     bpy.context.scene.world.light_settings.use_ambient_occlusion = ambient_occulusion
     bpy.context.scene.world.light_settings.ao_blend_type = blend_type
@@ -77,7 +78,7 @@ def setAmbientOcclusion(ambient_occulusion=True, samples=5, blend_type = 'ADD'):
 
 
 def setSmooth(obj, level=None, smooth=True):
-    if(level):
+    if level:
         # Add subsurf modifier
         modifier = obj.modifiers.new('Subsurf', 'SUBSURF')
         modifier.levels = level
@@ -109,7 +110,7 @@ def rainbowLights(r=5, n=100, freq=2, energy=0.1):
 
 def removeAll(type=None):
     # Possible type: ‘MESH’, ‘CURVE’, ‘SURFACE’, ‘META’, ‘FONT’, ‘ARMATURE’, ‘LATTICE’, ‘EMPTY’, ‘CAMERA’, ‘LAMP’
-    if(type):
+    if type:
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.select_by_type(type=type)
         bpy.ops.object.delete()

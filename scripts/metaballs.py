@@ -1,15 +1,6 @@
 import bpy
 import random
 from mathutils import Vector
-
-# Check if script is opened in Blender program
-import os, sys
-if(bpy.context.space_data == None):
-    cwd = os.path.dirname(os.path.abspath(__file__))
-else:
-    cwd = os.path.dirname(bpy.context.space_data.text.filepath)
-# Get folder of script and add current working directory to path
-sys.path.append(cwd)
 import utils
 
 

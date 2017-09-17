@@ -4,19 +4,10 @@ import numpy as np
 from mathutils import Vector, Matrix
 from math import sqrt, pi, sin, cos
 TAU = 2*pi
+import utils
 
 # https://en.wikipedia.org/wiki/Golden_angle
 goldenAngle = pi*(3 - sqrt(5))
-
-# Check if script is opened in Blender program
-import os, sys
-if(bpy.context.space_data == None):
-    cwd = os.path.dirname(os.path.abspath(__file__))
-else:
-    cwd = os.path.dirname(bpy.context.space_data.text.filepath)
-# Get folder of script and add current working directory to path
-sys.path.append(cwd)
-import utils
 
 
 # Get a frame of a vector (tangent, normal and binormal vectors)
@@ -157,5 +148,6 @@ if __name__ == '__main__':
     #scn.render.filepath = os.path.join(render_folder, 'phyllotaxis_flower.png')
     #bpy.ops.render.render(write_still=True)
 
+    # Render animation
     scn.render.filepath = os.path.join(render_folder, 'phyllotaxis_flower')
     bpy.ops.render.render(animation=True)
