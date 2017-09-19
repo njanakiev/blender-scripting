@@ -66,12 +66,6 @@ if __name__ == '__main__':
     # Enable ambient occlusion
     utils.setAmbientOcclusion(samples=10)
 
-    # Specify folder to save rendering
-    render_folder = os.path.join(cwd, 'rendering')
-    if(not os.path.exists(render_folder)):
-        os.mkdir(render_folder)
-
-
     # Select colors
     palette = [(181,221,201), (218,122,61)]
     palette = [utils.colorRGB_256(color) for color in palette]  # Adjust color to Blender
@@ -83,11 +77,5 @@ if __name__ == '__main__':
     mat = utils.simpleMaterial(palette[1])
     obj.data.materials.append(mat)
 
-
-    # Render image
-    rnd = bpy.data.scenes['Scene'].render
-    rnd.resolution_x = 500
-    rnd.resolution_y = 500
-    rnd.resolution_percentage = 100
-    rnd.filepath = os.path.join(render_folder, 'tetrahedron_fractal.png')
-    bpy.ops.render.render(write_still=True)
+    # Render scene
+    utils.renderToFolder('rendering', 'tetrahedron_fractal', 500, 500)

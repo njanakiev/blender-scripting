@@ -21,8 +21,8 @@ def createSurface(surface, n=10, m=10, origin=(0,0,0), name='Surface'):
     # Create uniform n by m grid
     for col in range(m):
         for row in range(n):
-            u = row/n
-            v = col/m
+            u = row / n
+            v = col / m
 
             # Surface parameterization
             point = surface(u, v)
@@ -58,8 +58,8 @@ if __name__ == '__main__':
     target = utils.target()
     camera = utils.camera((-10, -10, 10), target)
 
-    # Set cursor to (0,0,0)
-    bpy.context.scene.cursor_location = (0,0,0)
+    # Set cursor to (0, 0, 0)
+    bpy.context.scene.cursor_location = (0, 0, 0)
 
     # Create lamps
     utils.rainbowLights(10, 300, 3)
@@ -68,15 +68,5 @@ if __name__ == '__main__':
     torus = createSurface(torusSurface(4, 2), 20, 20)
     utils.setSmooth(torus, 2)
 
-    # Specify folder to save rendering
-    render_folder = os.path.join(cwd, 'rendering')
-    if(not os.path.exists(render_folder)):
-        os.mkdir(render_folder)
-
-    # Render image
-    rnd = bpy.data.scenes['Scene'].render
-    rnd.resolution_x = 500
-    rnd.resolution_y = 500
-    rnd.resolution_percentage = 100
-    rnd.filepath = os.path.join(render_folder, 'parametric_torus.png')
-    bpy.ops.render.render(write_still=True)
+    # Render scene
+    utils.renderToFolder('rendering', 'parametric_torus', 500, 500)

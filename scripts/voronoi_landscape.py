@@ -102,15 +102,5 @@ if __name__ == '__main__':
     # Enable ambient occlusion
     utils.setAmbientOcclusion(samples=10)
 
-    # Specify folder to save rendering
-    render_folder = os.path.join(cwd, 'rendering')
-    if(not os.path.exists(render_folder)):
-        os.mkdir(render_folder)
-
-    # Render image
-    rnd = bpy.data.scenes['Scene'].render
-    rnd.resolution_x = 500
-    rnd.resolution_y = 500
-    rnd.resolution_percentage = 100
-    rnd.filepath = os.path.join(render_folder, 'vornoi_landscape.png')
-    bpy.ops.render.render(write_still=True)
+    # Render scene
+    utils.renderToFolder('rendering', 'vornoi_landscape', 500, 500)

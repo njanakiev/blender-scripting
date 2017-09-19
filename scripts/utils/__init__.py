@@ -2,6 +2,7 @@ import bpy
 from math import sin, cos, pi
 tau = 2*pi
 import colorsys
+import os
 
 
 def trackToConstraint(obj, name, target):
@@ -56,18 +57,13 @@ def lamp(origin, type='POINT', energy=1, color=(1,1,1), target=None):
 
 
 def simpleScene(targetCoord, cameraCoord, sunCoord, lens=35):
-    #TODO extend/optimize
     print('createSimpleScene called')
 
-    # Create target empty
-    bpy.ops.object.add(type='EMPTY', location=targetCoord)
-    target = bpy.context.object
-    target.name = 'Target'
+    tar = target(targetCoord)
+    cam = camera(cameraCoord, tar, lens)
+    sun = lamp(sunCoord, 'SUN', target=tar)
 
-    cam = camera(cameraCoord, target, lens)
-    sun = lamp(sunCoord, 'SUN', target=target)
-
-    return target, cam, sun
+    return tar, cam, sun
 
 
 def setAmbientOcclusion(ambient_occulusion=True, samples=5, blend_type='ADD'):
@@ -159,3 +155,30 @@ def falloffMaterial(diffuse_color):
 
 def colorRGB_256(color):
     return tuple(pow(float(c)/255.0, 2.2) for c in color)
+
+def renderToFolder(renderFolder='rendering', renderName='render', resX=800, resY=800, resPercentage=100, animation=False, frame_end=100):
+    scn = bpy.context.scene
+    scn.render.resolution_x = resX
+    scn.render.resolution_y = resY
+    scn.render.resolution_percentage = resPercentage
+    scn.frame_end = frame_end
+
+    # Check if script is executed inside Blender
+    if bpy.context.space_data is None:
+        # Specify folder to save rendering and check if it exists
+        render_folder = os.path.join(os.getcwd(), renderFolder)
+        if(not os.path.exists(render_folder)):
+            os.mkdir(render_folder)
+
+        if animation:
+            # Render animation
+            scn.render.filepath = os.path.join(
+                render_folder,
+                renderName)
+            bpy.ops.render.render(animation=True)
+        else:
+            # Render still frame
+            scn.render.filepath = os.path.join(
+                render_folder,
+                renderName + '.png')
+            bpy.ops.render.render(write_still=True)

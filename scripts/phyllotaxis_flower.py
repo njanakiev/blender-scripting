@@ -123,7 +123,9 @@ if __name__ == '__main__':
 
     # Select colors
     palette = [(3,101,100), (205,179,128)]
-    palette = [utils.colorRGB_256(color) for color in palette]  # Adjust color to Blender
+    # Convert color and apply gamma correction
+    palette = [tuple(pow(float(c)/255, 2.2) for c in color)
+                for color in palette]
 
     # Set background color of scene
     bpy.context.scene.world.horizon_color = palette[0]
@@ -132,22 +134,6 @@ if __name__ == '__main__':
     mat = utils.falloffMaterial(palette[1])
     blossom.obj.data.materials.append(mat)
 
-    # Render settings
-    scn = bpy.context.scene
-    scn.frame_end = 50
-    scn.render.resolution_x = 500
-    scn.render.resolution_y = 500
-    scn.render.resolution_percentage = 100
-
-    # Specify folder to save rendering
-    render_folder = os.path.join(cwd, 'rendering')
-    if(not os.path.exists(render_folder)):
-        os.mkdir(render_folder)
-
-    # Render still frame
-    #scn.render.filepath = os.path.join(render_folder, 'phyllotaxis_flower.png')
-    #bpy.ops.render.render(write_still=True)
-
-    # Render animation
-    scn.render.filepath = os.path.join(render_folder, 'phyllotaxis_flower')
-    bpy.ops.render.render(animation=True)
+    # Render scene
+    utils.renderToFolder('frames', 'phyllotaxis_flower',
+        500, 500, animation=True, frame_end=50)
