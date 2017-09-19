@@ -7,13 +7,13 @@ This is a simple introduction to scripting in [Blender](https://www.blender.org/
 
 `Blender 2.5+`
 
-To run the examples, go with your favorite console to the example folder, make sure that the blender executable is an environment variable or in the PATH environment variable in Windows and run the following command.
+To run the examples, open your favorite console in the example folder, make sure that the Blender executable is an environment variable or in the PATH environment variable in Windows and run the following command. Make sure to edit in [run_blender_script.py](run_blender_script.py) the `scriptFile` variable to the Python script in the [scripts](scripts) folder you want to execute.
 
 ```
-blender -b -P simple_sphere.py
+blender -b -P run_blender_script.py
 ```
 
-Another option is to open the script in Blender and run the script inside Blender, which is a nice way to test and tweak the files and to see and play with the generated result before rendering.
+Another option is to open the script in Blender and run [run_blender_script.py](run_blender_script.py) inside Blender, which is a nice way to test and tweak the files and to see and play with the generated result before rendering.
 
 
 
