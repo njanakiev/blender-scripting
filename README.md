@@ -108,7 +108,7 @@ Generate random metaballs in Blender inspired by this [tutorial](http://blenders
 
 [voronoi_landscape.py](scripts/voronoi_landscape.py)
 
-This is a more advanced example for using a [Voronoi diagram](https://en.wikipedia.org/wiki/Voronoi_diagram). The Voronoi diagram is implemented with the module `scipy.spatial` which can be added with [Scipy](https://www.scipy.org/), or can be found in the Python distribution [Anaconda](https://www.continuum.io/downloads). The steps to use Anaconda as the Interpreter in Blender 2.77 are shown in this [solution](http://blender.stackexchange.com/questions/51067/using-anaconda-python-3-in-blender-winx64).
+This is a more advanced example for using a [Voronoi diagram](https://en.wikipedia.org/wiki/Voronoi_diagram). The Voronoi diagram is implemented with the module `scipy.spatial` which can be added with [Scipy](https://www.scipy.org/), or can be found in the Python distribution [Anaconda](https://www.continuum.io/downloads). The steps to use Anaconda as the Interpreter in Blender 2.77 are shown in this [solution](http://til.janakiev.com/using-anaconda-in-blender/).
 
 ![Voronoi Landscape](/img/vornoi_landscape.png)
 
