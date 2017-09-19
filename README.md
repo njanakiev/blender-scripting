@@ -1,5 +1,19 @@
 # blender-scripting
-This is a simple introduction to scripting in [Blender](https://www.blender.org/) with Python.
+This is a collection of simple to more involved examples to scripting in [Blender](https://www.blender.org/) with Python.
+
+
+
+## Table of Contents
+- [Requirements](#requirements)
+- [Resources](#resources)
+- [Utils](#utils)
+- [Simple Sphere](#simple-sphere)
+- [Parametric Torus](#parametric-torus)
+- [Metaballs](#metaballs)
+- [Voronoi Landscape](#voronoi-landscape)
+- [Tetrahedron Fractal](#tetrahedron-fractal)
+- [Phyllotaxis Flower](#phyllotaxis-flower)
+- [Rugged Donut](#rugged-donut)
 
 
 
@@ -7,13 +21,13 @@ This is a simple introduction to scripting in [Blender](https://www.blender.org/
 
 `Blender 2.5+`
 
-To run the examples, open your favorite console in the example folder, make sure that the Blender executable is an environment variable or in the PATH environment variable in Windows and run the following command. Make sure to edit in [run_blender_script.py](run_blender_script.py) the `scriptFile` variable to the Python script in the [scripts](scripts) folder you want to execute.
+To run the examples, open your favorite console in the example folder, make sure that the Blender executable is an environment variable or in the PATH environment variable in Windows and run the following command. Make sure to edit in [run_script.py](run_script.py) the `scriptFile` variable to the Python script in the [scripts](scripts) folder you want to execute.
 
 ```
-blender -b -P run_blender_script.py
+blender -b -P run_script.py
 ```
 
-Another option is to open the script in Blender and run [run_blender_script.py](run_blender_script.py) inside Blender, which is a nice way to test and tweak the files and to see and play with the generated result before rendering.
+Another option is to open the script in Blender and run [run_script.py](run_script.py) inside Blender, which is a nice way to test and tweak the files and to see and play with the generated result before rendering.
 
 
 
@@ -129,13 +143,15 @@ obj.data.materials.append(mat)
 
 [phyllotaxis_flower.py](scripts/phyllotaxis_flower.py)
 
-This script implements a [Phyllotaxis](https://en.wikipedia.org/wiki/Phyllotaxis) Flower which aranges leaves or the petals according to the [golden angle](https://en.wikipedia.org/wiki/Golden_angle). Additionally The flower is animated by appending an application handler for frame change by
+This script implements a [Phyllotaxis](https://en.wikipedia.org/wiki/Phyllotaxis) Flower which aranges leaves or the petals according to the [golden angle](https://en.wikipedia.org/wiki/Golden_angle). Additionally The flower is animated by appending an [application handler](https://docs.blender.org/api/blender_python_api_current/bpy.app.handlers.html) for frame change by
 
 ```python
 def handler(scene):
-	frame = scene.frame_current
-	# Create new geometry for new frame
-
+    frame = scene.frame_current
+    # Create new geometry for new frame
+    # ...
+	
+# Append frame change handler on frame change for playback and rendering (before)
 bpy.app.handlers.frame_change_pre.append(handler)
 ```
 
@@ -149,3 +165,66 @@ bpy.ops.render.render(animation=True)
 The animation is inspired by the mesmerizing sculptures by [John Edmark](http://www.johnedmark.com/).
 
 ![Phyllotaxis Flower](/img/phyllotaxis_flower.gif)
+
+
+
+## Rugged Donut
+
+[rugged_donut.py](scripts/rugged_donut.py)
+
+This script implements a number of different things available in Blender. For one it applies a [Displace modifier](https://docs.blender.org/manual/de/dev/modeling/modifiers/deform/displace.html) to a torus which displaces the object with a texture as follows.
+
+```python
+# Create musgrave texture 
+texture = bpy.data.textures.new('Texture', 'MUSGRAVE')
+
+# Create displace modifier and apply texture
+displace = obj.modifiers.new('Displace', 'DISPLACE')
+displace.texture = texture
+```
+
+Further we can control the texture by an object such as an [Empty object](https://docs.blender.org/manual/ja/dev/modeling/empties.html)
+
+```python
+# Create Empty to control texture coordinates
+empty = bpy.data.objects.new('Empty', None)
+bpy.context.scene.objects.link(empty)
+
+# Take the texture coordinates from empty’s coordinate system 
+displace.texture_coords = 'OBJECT'
+displace.texture_coords_object = empty
+```
+
+Additionally we want to add a material with additional bump map to our torus object which is done in the following way.
+
+```python
+# Create bump map texture
+bumptex = bpy.data.textures.new('BumpMapTexture', 'CLOUDS')
+
+# Create material
+mat = bpy.data.materials.new('BumpMapMaterial')
+
+# Add texture slot for material and add texture to this slot
+slot = mat.texture_slots.add()
+slot.texture = bumptex
+slot.texture_coords = 'GLOBAL'
+slot.use_map_color_diffuse = False
+slot.use_map_normal = True
+
+# Append material to object
+obj.data.materials.append(mat)
+```
+
+Now we want to animate the empty in order to animate the texture. We can achieve this by inserting keyframes for the location of our empty as shown in this quick [tutorial](blenderscripting.blogspot.co.at/2011/05/inspired-by-post-on-ba-it-just-so.html) and in the next snippet.
+
+```python
+for frame in range(1, num_frames):
+    t = frame / num_frames
+    x = 0.7*cos(2*pi*t)
+    y = 0.7*sin(2*pi*t)
+    z = 0.4*sin(2*pi*t)
+    empty.location = (x, y, z)
+    empty.keyframe_insert(data_path="location", index=-1, frame=frame)
+```
+
+![Rugged Donut](/img/rugged_donut.gif)
