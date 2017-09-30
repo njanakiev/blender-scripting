@@ -16,11 +16,11 @@ def trackToConstraint(obj, name, target):
 
 
 def target(origin=(0,0,0)):
-    target = bpy.data.objects.new('Target', None)
-    bpy.context.scene.objects.link(target)
-    target.location = origin
+    tar = bpy.data.objects.new('Target', None)
+    bpy.context.scene.objects.link(tar)
+    tar.location = origin
 
-    return target
+    return tar
 
 
 def camera(origin, target=None, lens=35, clip_start=0.1, clip_end=200, type='PERSP', ortho_scale=6):
@@ -156,12 +156,16 @@ def falloffMaterial(diffuse_color):
 def colorRGB_256(color):
     return tuple(pow(float(c)/255.0, 2.2) for c in color)
 
-def renderToFolder(renderFolder='rendering', renderName='render', resX=800, resY=800, resPercentage=100, animation=False, frame_end=100):
+def renderToFolder(renderFolder='rendering', renderName='render', resX=800, resY=800, resPercentage=100, animation=False, frame_end=None):
+    print('renderToFolder called')
     scn = bpy.context.scene
     scn.render.resolution_x = resX
     scn.render.resolution_y = resY
     scn.render.resolution_percentage = resPercentage
-    scn.frame_end = frame_end
+    if frame_end:
+        scn.frame_end = frame_end
+
+    print(bpy.context.space_data)
 
     # Check if script is executed inside Blender
     if bpy.context.space_data is None:

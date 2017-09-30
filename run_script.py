@@ -3,10 +3,10 @@ import os
 import sys
 
 # Specify the script to be executed
-scriptFile = "rugged_donut.py"
+scriptFile = "fisher_iris_visualization.py"
 
 # Check if script is executed in Blender and get absolute path of current folder
-if(bpy.context.space_data is not None):
+if bpy.context.space_data is not None:
     filesDir = os.path.dirname(bpy.context.space_data.text.filepath)
 else:
     filesDir = os.path.dirname(os.path.abspath(__file__))
