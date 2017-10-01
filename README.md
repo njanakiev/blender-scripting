@@ -14,7 +14,7 @@ This is a collection of simple to more involved examples to scripting in [Blende
 - [Tetrahedron Fractal](#tetrahedron-fractal)
 - [Phyllotaxis Flower](#phyllotaxis-flower)
 - [Rugged Donut](#rugged-donut)
-
+- [Fisher Iris Visualization](#fisher-iris-visualization)
 
 
 ## Requirements
@@ -228,3 +228,47 @@ for frame in range(1, num_frames):
 ```
 
 ![Rugged Donut](/img/rugged_donut.gif)
+
+
+
+## Fisher Iris Visualization
+
+[fisher_iris_visualization.py](scripts/fisher_iris_visualization.py)
+
+This script implements a visualization of the famous [Fisher's Iris data set](https://en.wikipedia.org/wiki/Iris_flower_data_set). The data set consists of 50 samples for each of three flower species of Iris setosa, Iris virginica and Iris versicolor. Each sample consists of four features (sepal length, sepal width, petal length and petal width). In order to visualize the data set in three dimensions we apply dimensionality reduction by using [Principal Component Analysis](https://en.wikipedia.org/wiki/Principal_component_analysis). The data set and PCA are both included in the [scikit-learn](http://scikit-learn.org/stable/) library for Python. This script works both with or without sklearn which is not part of the Blender Python distribution. You can use sklearn by using [Anaconda](https://anaconda.org/) in Blender which I show in this quick [tutorial](http://til.janakiev.com/using-anaconda-in-blender/).
+
+```python
+from sklearn import datasets
+from sklearn import decomposition
+
+# Load Dataset
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+labels = iris.target_names
+
+# Reduce components by Principal Component Analysis from sklearn
+X = decomposition.PCA(n_components=3).fit_transform(X)
+```
+The data set in [/scripts/data/iris/](/scripts/data/iris/) is downloaded from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/iris) and PCA is implemented manually with the help of the included [Numpy](http://www.numpy.org/) library. If sklearn is not in the current Python distribution the Iris data set is loaded as in the next code snippet.
+
+```python
+path = os.path.join('data', 'iris', 'iris.data')
+iris_data = np.genfromtxt(path, dtype='str', delimiter=',')
+X = iris_data[:, :4].astype(dtype=float)
+y = np.ndarray((X.shape[0],), dtype=int)
+
+# Create target vector y and corresponding labels
+labels, idx = [], 0
+for i, label in enumerate(iris_data[:, 4]):
+    if label not in labels:
+        labels.append(label); idx += 1
+    y[i] = idx - 1
+
+# Reduce components by implemented Principal Component Analysis
+X = PCA(X, 3)[0]
+```
+
+The data set is loaded into the scene as a 3D scatter plot with different shape primitives for each class of flower from the [BMesh Operators](https://docs.blender.org/api/blender_python_api_current/bmesh.ops.html). Additionally each collection of shapes in a class has different materials assigned to them. Each class has corresponding labels which are rotated toward the camera by a [Locked Track Constraint](https://docs.blender.org/manual/en/dev/rigging/constraints/tracking/locked_track.html).
+
+![Fisher Iris Visualization](/img/fisher_iris_visualization.gif)
