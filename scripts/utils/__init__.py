@@ -5,14 +5,16 @@ import colorsys
 import os
 
 
-def trackToConstraint(obj, name, target):
+def trackToConstraint(obj, target):
     constraint = obj.constraints.new('TRACK_TO')
-    constraint.name = name
     constraint.target = target
     constraint.track_axis = 'TRACK_NEGATIVE_Z'
+    #constraint.track_axis = 'TRACK_Z'
     constraint.up_axis = 'UP_Y'
-    constraint.owner_space = 'LOCAL'
-    constraint.target_space = 'LOCAL'
+    #constraint.owner_space = 'LOCAL'
+    #constraint.target_space = 'LOCAL'
+
+    return constraint
 
 
 def target(origin=(0,0,0)):
@@ -39,7 +41,7 @@ def camera(origin, target=None, lens=35, clip_start=0.1, clip_end=200, type='PER
     bpy.context.scene.objects.link(obj)
     bpy.context.scene.camera = obj # Make this the current camera
 
-    if target: trackToConstraint(obj, 'TrackConstraint', target)
+    if target: trackToConstraint(obj, target)
     return obj
 
 
@@ -52,7 +54,7 @@ def lamp(origin, type='POINT', energy=1, color=(1,1,1), target=None):
     obj.data.energy = energy
     obj.data.color = color
 
-    if target: trackToConstraint(obj, 'TrackConstraint', target)
+    if target: trackToConstraint(obj, target)
     return obj
 
 

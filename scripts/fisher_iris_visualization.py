@@ -1,6 +1,5 @@
 import bpy
 import bmesh
-import utils
 import numpy as np
 from mathutils import Vector, Matrix
 from math import pi
@@ -31,6 +30,7 @@ def PCA(data, num_components=None):
 def load_iris():
     try:
         # Load Iris dataset from the sklearn.datasets package
+        import peter
         from sklearn import datasets
         from sklearn import decomposition
 
@@ -44,6 +44,7 @@ def load_iris():
         X = decomposition.PCA(n_components=3).fit_transform(X)
     except ImportError:
         # Load Iris dataset manually
+        path = os.path.join('data', 'iris', 'iris.data')
         iris_data = np.genfromtxt(path, dtype='str', delimiter=',')
         X = iris_data[:, :4].astype(dtype=float)
         y = np.ndarray((X.shape[0],), dtype=int)
@@ -51,7 +52,8 @@ def load_iris():
         # Create target vector y and corresponding labels
         labels, idx = [], 0
         for i, label in enumerate(iris_data[:, 4]):
-            if label not in labelsSet:
+            label = label.split('-')[1]
+            if label not in labels:
                 labels.append(label); idx += 1
             y[i] = idx - 1
 
@@ -62,52 +64,86 @@ def load_iris():
 
 
 def createScatter(X, y, size=0.25):
-    labels = set(y)
+    labelIndices = set(y)
     colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), \
               (1, 1, 0), (1, 0, 1), (0, 1, 1)]
 
     # Create a bmesh for each label
     bmList = []
-    for label in labels:
+    for labelIdx in labelIndices:
         bmList.append(bmesh.new())
 
-    # Iterate through all the vectors and labels
-    for x, label in zip(X, y):
+    # Iterate through all the vectors and targets
+    for x, labelIdx in zip(X, y):
         # Use the vector as translation for each point
         T = Matrix.Translation(x)
 
-        if label % 3 == 0:
-            bmesh.ops.create_cube(bmList[label],
+        if labelIdx % 3 == 0:
+            bmesh.ops.create_cube(bmList[labelIdx],
                 size=size, matrix=T)
-        elif label % 3 == 1:
-            bmesh.ops.create_icosphere(bmList[label],
+        elif labelIdx % 3 == 1:
+            bmesh.ops.create_icosphere(bmList[labelIdx],
                 diameter=size/2, matrix=T)
         else:
-            bmesh.ops.create_cone(bmList[label],
+            bmesh.ops.create_cone(bmList[labelIdx],
                 segments=6, cap_ends=True,
                 diameter1=size/2, diameter2=0,
                 depth=size, matrix=T)
 
     objects = []
-    for label, color in zip(labels, colors):
+    for labelIdx, color in zip(labelIndices, colors):
         # Create a mesh from the existing bmesh
-        mesh = bpy.data.meshes.new('ScatterMesh {}'.format(label))
-        bmList[label].to_mesh(mesh)
-        bmList[label].free()
+        mesh = bpy.data.meshes.new('ScatterMesh {}'.format(labelIdx))
+        bmList[labelIdx].to_mesh(mesh)
+        bmList[labelIdx].free()
 
         # Create a object with the mesh and link it to the scene
-        obj = bpy.data.objects.new('ScatterObject {}'.format(label), mesh)
+        obj = bpy.data.objects.new('ScatterObject {}'.format(labelIdx), mesh)
         bpy.context.scene.objects.link(obj)
-        bpy.context.scene.update()
 
         # Create materials for each bmesh
-        mat = bpy.data.materials.new('ScatterMaterial {}'.format(label))
+        mat = bpy.data.materials.new('ScatterMaterial {}'.format(labelIdx))
         mat.diffuse_color = color
         mat.diffuse_intensity = 0.5
         mat.specular_intensity = 0.0
         obj.data.materials.append(mat)
 
         objects.append(obj)
+
+
+def createLabels(X, y, labels, camera=None):
+    labelIndices = set(y)
+    objects = []
+
+    # Draw labels
+    for labelIdx in labelIndices:
+        center = np.sum([x for x, idx in zip(X, y) \
+            if idx == labelIdx], axis=0)
+        counts = (y == labelIdx).sum()
+        center = Vector(center) / counts
+
+        label = labels[labelIdx]
+        fontCurve = bpy.data.curves.new(type="FONT", name=label)
+        fontCurve.body = label
+        fontCurve.align_x = 'CENTER'
+        fontCurve.align_y = 'BOTTOM'
+        fontCurve.size = 0.6
+
+        obj = bpy.data.objects.new("Label {}".format(label), fontCurve)
+        obj.location = center + Vector((0, 0, 0.8))
+        obj.rotation_mode = 'AXIS_ANGLE'
+        obj.rotation_axis_angle = (pi/2, 1, 0, 0)
+        bpy.context.scene.objects.link(obj)
+
+        if camera is not None:
+            constraint = obj.constraints.new('LOCKED_TRACK')
+            constraint.target = camera
+            constraint.track_axis = 'TRACK_Z'
+            constraint.lock_axis = 'LOCK_Y'
+
+        objects.append(obj)
+
+    bpy.context.scene.update()
 
     return objects
 
@@ -121,13 +157,13 @@ if __name__ == '__main__':
 
     # Create camera and lamp
     target, camera, lamp = utils.simpleScene(
-        (0, 0, 0), (6, 6, 2), (-5, 5, 10))
+        (0, 0, 0), (6, 6, 3.5), (-5, 5, 10))
 
     # Make target as parent of camera
     camera.parent = target
 
     # Set number of frames
-    bpy.context.scene.frame_end = 200
+    bpy.context.scene.frame_end = 50
 
     # Animate rotation of target by keyframe animation
     target.rotation_mode = 'AXIS_ANGLE'
@@ -147,6 +183,7 @@ if __name__ == '__main__':
     X, y, labels = load_iris()
 
     createScatter(X, y)
+    createLabels(X, y, labels, camera)
 
     # Create a grid
     bpy.ops.mesh.primitive_grid_add(
@@ -166,5 +203,5 @@ if __name__ == '__main__':
     grid.data.materials.append(gridMat)
 
 
-    utils.renderToFolder('frames', 'fisher_iris_visualization', 800, 800,
-        animation=False)
+    utils.renderToFolder('frames', 'fisher_iris_visualization', 640, 480,
+        animation=True)
