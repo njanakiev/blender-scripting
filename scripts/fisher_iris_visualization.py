@@ -1,6 +1,7 @@
 import bpy
 import bmesh
 import numpy as np
+import utils
 from mathutils import Vector, Matrix
 from math import pi
 
@@ -30,7 +31,6 @@ def PCA(data, num_components=None):
 def load_iris():
     try:
         # Load Iris dataset from the sklearn.datasets package
-        import peter
         from sklearn import datasets
         from sklearn import decomposition
 
@@ -111,7 +111,7 @@ def createScatter(X, y, size=0.25):
         objects.append(obj)
 
 
-def createLabels(X, y, labels, camera=None):
+def createLabels(X, y, labels, cameraObj=None):
     labelIndices = set(y)
     objects = []
 
@@ -135,9 +135,9 @@ def createLabels(X, y, labels, camera=None):
         obj.rotation_axis_angle = (pi/2, 1, 0, 0)
         bpy.context.scene.objects.link(obj)
 
-        if camera is not None:
+        if cameraObj is not None:
             constraint = obj.constraints.new('LOCKED_TRACK')
-            constraint.target = camera
+            constraint.target = cameraObj
             constraint.track_axis = 'TRACK_Z'
             constraint.lock_axis = 'LOCK_Y'
 
@@ -156,34 +156,34 @@ if __name__ == '__main__':
     utils.setAmbientOcclusion()
 
     # Create camera and lamp
-    target, camera, lamp = utils.simpleScene(
+    targetObj, cameraObj, lampObj = utils.simpleScene(
         (0, 0, 0), (6, 6, 3.5), (-5, 5, 10))
 
     # Make target as parent of camera
-    camera.parent = target
+    cameraObj.parent = targetObj
 
     # Set number of frames
     bpy.context.scene.frame_end = 50
 
     # Animate rotation of target by keyframe animation
-    target.rotation_mode = 'AXIS_ANGLE'
-    target.rotation_axis_angle = (0, 0, 0, 1)
-    target.keyframe_insert(data_path='rotation_axis_angle', index=-1,
+    targetObj.rotation_mode = 'AXIS_ANGLE'
+    targetObj.rotation_axis_angle = (0, 0, 0, 1)
+    targetObj.keyframe_insert(data_path='rotation_axis_angle', index=-1,
         frame=bpy.context.scene.frame_start)
-    target.rotation_axis_angle = (2*pi, 0, 0, 1)
+    targetObj.rotation_axis_angle = (2*pi, 0, 0, 1)
     # Set last frame to one frame further to have an animation loop
-    target.keyframe_insert(data_path='rotation_axis_angle', index=-1,
+    targetObj.keyframe_insert(data_path='rotation_axis_angle', index=-1,
         frame=bpy.context.scene.frame_end + 1)
 
     # Change each created keyframe point to linear interpolation
-    for fcurve in target.animation_data.action.fcurves:
+    for fcurve in targetObj.animation_data.action.fcurves:
         for keyframe in fcurve.keyframe_points:
             keyframe.interpolation = 'LINEAR'
 
     X, y, labels = load_iris()
 
     createScatter(X, y)
-    createLabels(X, y, labels, camera)
+    createLabels(X, y, labels, cameraObj)
 
     # Create a grid
     bpy.ops.mesh.primitive_grid_add(
@@ -203,5 +203,5 @@ if __name__ == '__main__':
     grid.data.materials.append(gridMat)
 
 
-    utils.renderToFolder('frames', 'fisher_iris_visualization', 640, 480,
+    utils.renderToFolder('frames', 'fisher_iris_visualization', 500, 500,
         animation=True)
