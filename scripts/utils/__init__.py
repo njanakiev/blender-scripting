@@ -1,8 +1,20 @@
 import bpy
+import bmesh
 from math import sin, cos, pi
 tau = 2*pi
 import colorsys
 import os
+
+
+def removeObject(obj):
+    if obj.type == 'MESH':
+        if obj.data.name in bpy.data.meshes:
+            bpy.data.meshes.remove(obj.data)
+        if obj.name in bpy.context.scene.objects:
+            bpy.context.scene.objects.unlink(obj)
+        bpy.data.objects.remove(obj)
+    else:
+        raise NotImplementedError('Other types not implemented yet besides \'MESH\'')
 
 
 def trackToConstraint(obj, target):
@@ -158,6 +170,7 @@ def falloffMaterial(diffuse_color):
 def colorRGB_256(color):
     return tuple(pow(float(c)/255.0, 2.2) for c in color)
 
+
 def renderToFolder(renderFolder='rendering', renderName='render', resX=800, resY=800, resPercentage=100, animation=False, frame_end=None):
     print('renderToFolder called')
     scn = bpy.context.scene
@@ -188,3 +201,15 @@ def renderToFolder(renderFolder='rendering', renderName='render', resX=800, resY
                 render_folder,
                 renderName + '.png')
             bpy.ops.render.render(write_still=True)
+
+
+def bmeshToObject(bm, name='Object'):
+    mesh = bpy.data.meshes.new(name+'Mesh')
+    bm.to_mesh(mesh)
+    bm.free()
+
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.objects.link(obj)
+    bpy.context.scene.update()
+
+    return obj
