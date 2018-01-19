@@ -15,6 +15,7 @@ This is a collection of simple to more involved examples to scripting in [Blende
 - [Phyllotaxis Flower](#phyllotaxis-flower)
 - [Rugged Donut](#rugged-donut)
 - [Fisher Iris Visualization](#fisher-iris-visualization)
+- [Voronoi Sphere](#voronoi-sphere)
 
 
 ## Requirements
@@ -272,3 +273,13 @@ X = PCA(X, 3)[0]
 The data set is loaded into the scene as a 3D scatter plot with different shape primitives for each class of flower from the [BMesh Operators](https://docs.blender.org/api/blender_python_api_current/bmesh.ops.html). Additionally each collection of shapes in a class has different materials assigned to them. Each class has corresponding labels which are rotated toward the camera by a [Locked Track Constraint](https://docs.blender.org/manual/en/dev/rigging/constraints/tracking/locked_track.html).
 
 ![Fisher Iris Visualization](/img/fisher_iris_visualization.gif)
+
+
+
+## Voronoi Sphere
+
+[voronoi_sphere.py](scripts/voronoi_sphere.py)
+
+This is another example using the [Voronoi diagram](https://en.wikipedia.org/wiki/Voronoi_diagram), but this time in the 3rd dimension. It is implemented as well with the module `scipy.spatial` which can be added with [Scipy](https://www.scipy.org/) and it is even used in a similar way as the previous Voronoi example in 2D.
+
+![Voronoi Sphere](/img/voronoi_sphere.png)
