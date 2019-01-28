@@ -55,6 +55,7 @@ Some frequently used functions in blender, which will be used in most of the scr
 Simple rendering of a smooth sphere. First an icosphere is added with
 
 ```python
+import bpy
 bpy.ops.mesh.primitive_ico_sphere_add(location=(0, 0, 0))
 obj = bpy.context.object
 ```
