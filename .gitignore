@@ -87,3 +87,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+#frame files
+scripts/frames/fisher_iris_visualization*.png

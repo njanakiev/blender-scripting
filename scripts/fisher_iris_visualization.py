@@ -65,8 +65,8 @@ def load_iris():
 
 def createScatter(X, y, size=0.25):
     labelIndices = set(y)
-    colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), \
-              (1, 1, 0), (1, 0, 1), (0, 1, 1)]
+    colors = [(1, 0, 0, 1), (0, 1, 0, 1), (0, 0, 1, 1), \
+              (1, 1, 0, 1), (1, 0, 1, 1), (0, 1, 1, 1)]
 
     # Create a bmesh for each label
     bmList = []
@@ -99,12 +99,12 @@ def createScatter(X, y, size=0.25):
 
         # Create a object with the mesh and link it to the scene
         obj = bpy.data.objects.new('ScatterObject {}'.format(labelIdx), mesh)
-        bpy.context.scene.objects.link(obj)
+        bpy.context.collection.objects.link(obj)
 
         # Create materials for each bmesh
         mat = bpy.data.materials.new('ScatterMaterial {}'.format(labelIdx))
         mat.diffuse_color = color
-        mat.diffuse_intensity = 0.5
+        # mat.diffuse_intensity = 0.5
         mat.specular_intensity = 0.0
         obj.data.materials.append(mat)
 
@@ -133,7 +133,8 @@ def createLabels(X, y, labels, cameraObj=None):
         obj.location = center + Vector((0, 0, 0.8))
         obj.rotation_mode = 'AXIS_ANGLE'
         obj.rotation_axis_angle = (pi/2, 1, 0, 0)
-        bpy.context.scene.objects.link(obj)
+        # bpy.context.scene.objects.link(obj)
+        bpy.context.collection.objects.link(obj)
 
         if cameraObj is not None:
             constraint = obj.constraints.new('LOCKED_TRACK')
@@ -142,8 +143,10 @@ def createLabels(X, y, labels, cameraObj=None):
             constraint.lock_axis = 'LOCK_Y'
 
         objects.append(obj)
+        bpy.context.scene.collection.objects.link(obj)
 
-    bpy.context.scene.update()
+    # bpy.context.scene.update()
+    # bpy.context.scene.collection.objects.link(objects)
 
     return objects
 
@@ -187,7 +190,7 @@ if __name__ == '__main__':
 
     # Create a grid
     bpy.ops.mesh.primitive_grid_add(
-        radius=3,
+        # radius=3,
         location=(0, 0, 0),
         x_subdivisions=15,
         y_subdivisions=15)
@@ -196,9 +199,9 @@ if __name__ == '__main__':
 
     # Create grid material
     gridMat = bpy.data.materials.new('GridMaterial')
-    gridMat.type = 'WIRE'
-    gridMat.use_transparency = True
-    gridMat.alpha = 0.3
+    # gridMat.type = 'WIRE'
+    # gridMat.use_transparency = True
+    # gridMat.alpha = 0.3
 
     grid.data.materials.append(gridMat)
 
