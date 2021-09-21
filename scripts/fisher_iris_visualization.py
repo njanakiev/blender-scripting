@@ -4,7 +4,7 @@ import numpy as np
 import utils
 from mathutils import Vector, Matrix
 from math import pi
-
+import os
 
 def PCA(data, num_components=None):
     # mean center the data
