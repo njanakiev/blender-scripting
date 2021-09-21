@@ -190,7 +190,7 @@ if __name__ == '__main__':
 
     # Create a grid
     bpy.ops.mesh.primitive_grid_add(
-        # radius=3,
+        size=5,
         location=(0, 0, 0),
         x_subdivisions=15,
         y_subdivisions=15)

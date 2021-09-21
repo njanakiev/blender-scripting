@@ -108,7 +108,7 @@ def rainbowLights(r=5, n=100, freq=2, energy=0.1):
         pos = (r*sin(tau*t), r*cos(tau*t), r*sin(freq*tau*t))
 
         # Create lamp
-        bpy.ops.object.add(type='LAMP', location=pos)
+        bpy.ops.object.add(type='LIGHT', location=pos)
         obj = bpy.context.object
         obj.data.type = 'POINT'
 
@@ -121,7 +121,7 @@ def rainbowLights(r=5, n=100, freq=2, energy=0.1):
 
 
 def removeAll(type=None):
-    # Possible type: �MESH�, �CURVE�, �SURFACE�, �META�, �FONT�, �ARMATURE�, �LATTICE�, �EMPTY�, �CAMERA�, �LAMP�
+    # Possible type: "MESH", "CURVE", "SURFACE", "META", "FONT", "ARMATURE", "LATTICE", "EMPTY", "CAMERA", "LIGHT"
     if type:
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.select_by_type(type=type)
