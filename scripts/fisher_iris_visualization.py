@@ -125,7 +125,8 @@ def createLabels(X, y, labels, cameraObj=None):
         label = labels[labelIdx]
         fontCurve = bpy.data.curves.new(type="FONT", name=label)
         fontCurve.body = label
-        fontCurve.align = 'CENTER'
+        fontCurve.align_x = 'CENTER'
+        fontCurve.align_y = 'BOTTOM'
         fontCurve.size = 0.6
 
         obj = bpy.data.objects.new("Label {}".format(label), fontCurve)
