@@ -20,16 +20,27 @@ This is a collection of simple to more involved examples to scripting in [Blende
 
 ## Requirements
 
-`Blender 2.5+`
+`Blender 2.8+`
 
-To run the examples, open your favorite console in the example folder, make sure that the Blender executable is an environment variable or in the PATH environment variable in Windows and run the following command. Make sure to edit in [run_script.py](run_script.py) the `scriptFile` variable to the Python script in the [scripts](scripts) folder you want to execute.
+To run the examples, open your favorite console in the example folder. Make sure to edit in [run_script.py](run_script.py) the `scriptFile` variable to the Python script in the [scripts](scripts) folder you want to execute.
 
-```
+```bash
 blender -b -P run_script.py
 ```
 
 Another option is to open the script in Blender and run [run_script.py](run_script.py) inside Blender, which is a nice way to test and tweak the files and to see and play with the generated result before rendering.
 
+To create videos from frames, you can use [ffmpeg](https://ffmpeg.org/) as follows:
+
+```bash
+ffmpeg \
+  -r 15 \                                 # frame rate
+  -i frames/phyllotaxis_flower%04d.png \  # input path
+  -c:v libx264 \                          # video codec (H.246)
+  -c:a aac -ar 44100 \                    # audio codec (AAC with 44100 Hz)
+  -pix_fmt yuv420p \                      # pixel format and color sampling
+  phyllotaxis_flower.mp4                  # output path
+```
 
 
 ## Resources
@@ -166,7 +177,7 @@ bpy.ops.render.render(animation=True)
 
 The animation is inspired by the mesmerizing sculptures by [John Edmark](http://www.johnedmark.com/).
 
-![Phyllotaxis Flower](/img/phyllotaxis_flower.gif)
+![Phyllotaxis Flower](/img/phyllotaxis_flower.mp4)
 
 
 
@@ -229,7 +240,7 @@ for frame in range(1, num_frames):
     empty.keyframe_insert(data_path="location", index=-1, frame=frame)
 ```
 
-![Rugged Donut](/img/rugged_donut.gif)
+![Rugged Donut](/img/rugged_donut.mp4)
 
 
 
@@ -273,7 +284,7 @@ X = PCA(X, 3)[0]
 
 The data set is loaded into the scene as a 3D scatter plot with different shape primitives for each class of flower from the [BMesh Operators](https://docs.blender.org/api/blender_python_api_current/bmesh.ops.html). Additionally each collection of shapes in a class has different materials assigned to them. Each class has corresponding labels which are rotated toward the camera by a [Locked Track Constraint](https://docs.blender.org/manual/en/dev/rigging/constraints/tracking/locked_track.html).
 
-![Fisher Iris Visualization](/img/fisher_iris_visualization.gif)
+![Fisher Iris Visualization](/img/fisher_iris_visualization.mp4)
 
 
 
