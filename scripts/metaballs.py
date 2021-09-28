@@ -7,7 +7,7 @@ import utils
 def createMetaball(origin=(0, 0, 0), n=30, r0=4, r1=2.5):
     metaball = bpy.data.metaballs.new('MetaBall')
     obj = bpy.data.objects.new('MetaBallObject', metaball)
-    bpy.context.scene.objects.link(obj)
+    bpy.context.collection.objects.link(obj)
 
     metaball.resolution = 0.2
     metaball.render_resolution = 0.05
@@ -19,22 +19,26 @@ def createMetaball(origin=(0, 0, 0), n=30, r0=4, r1=2.5):
         element.co = location
         element.radius = r1
 
-    return metaball
+    return obj
 
 
 if __name__ == '__main__':
     # Remove all elements
-    utils.removeAll()
+    utils.remove_all()
 
     # Create camera
-    target = utils.target()
-    camera = utils.camera((-10, -10, 10), target)
+    target = utils.create_target()
+    camera = utils.create_camera((-10, -10, 10), target)
 
-    # Create lamps
-    utils.rainbowLights(10, 300, 3)
+    # Create lights
+    utils.rainbowLights(10, 100, 3, energy=100)
 
     # Create metaball
-    metaball = createMetaball()
+    obj = createMetaball()
+    
+    # Create material
+    mat = utils.create_material(metalic=0.5)
+    obj.data.materials.append(mat)
 
     # Render scene
-    utils.renderToFolder('rendering', 'metaballs', 500, 500)
+    utils.render('rendering', 'metaballs', 512, 512)

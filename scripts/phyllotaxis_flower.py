@@ -3,11 +3,11 @@ import bmesh
 import numpy as np
 from mathutils import Vector, Matrix
 from math import sqrt, pi, sin, cos
-TAU = 2*pi
 import utils
 
+TAU = 2*pi
 # https://en.wikipedia.org/wiki/Golden_angle
-goldenAngle = pi*(3 - sqrt(5))
+GOLDEN_ANGLE = pi*(3 - sqrt(5))
 
 
 # Get a frame of a vector (tangent, normal and binormal vectors)
@@ -33,7 +33,7 @@ class PhyllotaxisFlower():
         self.frames = scene.frame_end - scene.frame_start + 1
 
         # Calculate and compensate for angle offset for infinite animation
-        self.offset = (self.frames * goldenAngle) % TAU
+        self.offset = (self.frames * GOLDEN_ANGLE) % TAU
         if self.offset > pi: self.offset -= TAU
 
         # Create object
@@ -47,15 +47,13 @@ class PhyllotaxisFlower():
         bm.free()
 
         # Link object to scene
-        scene.objects.link(self.obj)
-        scene.update()
+        scene.collection.objects.link(self.obj)
 
-        # Append new frame change handler to redraw geometry
-        # for each frame change
-        bpy.app.handlers.frame_change_pre.append(self.__frameChangeHandler)
+        # Append new frame change handler to redraw geometry for each frame
+        bpy.app.handlers.frame_change_pre.append(self.__frame_change_handler)
 
 
-    def __frameChangeHandler(self, scene):
+    def __frame_change_handler(self, scene, value):
         frame = scene.frame_current
         # Constrain to frame range
         if(frame < 1): frame = 1
@@ -75,7 +73,7 @@ class PhyllotaxisFlower():
 
         for i in range(self.n):
             t0 = i / self.n
-            r0, theta = t0*self.r0, i*goldenAngle - frame*goldenAngle + t*self.offset
+            r0, theta = t0*self.r0, i*GOLDEN_ANGLE - frame*GOLDEN_ANGLE + t*self.offset
 
             x = r0*cos(theta)
             y = r0*sin(theta)
@@ -88,7 +86,7 @@ class PhyllotaxisFlower():
             for j in range(self.m):
                 t1 = j / self.m
                 t2 = 0.4 + 0.6*t0
-                r1, theta = t2*t1*self.r1, j*goldenAngle #- frame*goldenAngle + t*self.offset
+                r1, theta = t2*t1*self.r1, j*GOLDEN_ANGLE #- frame*goldenAngle + t*self.offset
 
                 x = r1*cos(theta)
                 y = r1*sin(theta)
@@ -97,29 +95,29 @@ class PhyllotaxisFlower():
                 T1, N1, B1 = getTNBfromVector(p1)
                 M1 = Matrix([T1, B1, N1]).to_4x4().transposed()
 
-                p = p0 + M0*p1
+                p = p0 + (M0 @ p1)
                 r2 = t2*t1*self.r2
 
                 T = Matrix.Translation(p)
                 bmesh.ops.create_cone(bm,
-                                cap_ends=True, segments=6,
-                                diameter1=r2, diameter2=r2,
-                                depth=0.1*r2, matrix=T*M0*M1*Rot)
+                    cap_ends=True, segments=6,
+                    diameter1=r2, diameter2=r2,
+                    depth=0.1*r2, matrix=T @ M0 @ M1 @ Rot)
         return bm
 
 
 if __name__ == '__main__':
     # Remove all elements
-    utils.removeAll()
+    bpy.ops.object.select_all(action="SELECT")
+    bpy.ops.object.delete(use_global=False)
 
     # Creata phyllotaxis flower
-    blossom = PhyllotaxisFlower(bpy.context.scene)
+    flower = PhyllotaxisFlower(bpy.context.scene)
 
     # Create camera and lamp
-    utils.simpleScene((0, 0, -1.5), (-21.5, -21.5, 12.5), (-5, 5, 10))
-
-    # Enable ambient occlusion
-    utils.setAmbientOcclusion(samples=10)
+    target = utils.create_target((0, 0, -1.5))
+    camera = utils.create_camera((-21.0, -21.0, 12.5), target, 35)
+    sun = utils.create_light((-5, 5, 10), 'SUN', target=target)
 
     # Select colors
     palette = [(3,101,100), (205,179,128)]
@@ -127,13 +125,20 @@ if __name__ == '__main__':
     palette = [tuple(pow(float(c)/255, 2.2) for c in color)
                 for color in palette]
 
+    # Smooth surface and add subsurf modifier
+    utils.set_smooth(flower.obj, 2)
+
     # Set background color of scene
-    bpy.context.scene.world.horizon_color = palette[0]
+    bpy.context.scene.world.use_nodes = False
+    bpy.context.scene.world.color = palette[0]
 
     # Set material for object
-    mat = utils.falloffMaterial(palette[1])
-    blossom.obj.data.materials.append(mat)
+    mat = utils.create_material(palette[1], roughness=0.8)
+    flower.obj.data.materials.append(mat)
 
     # Render scene
-    utils.renderToFolder('frames', 'phyllotaxis_flower',
-        500, 500, animation=True, frame_end=50)
+    utils.render(
+        'frames_02', 'phyllotaxis_flower', 512, 512,
+        render_engine='CYCLES',
+        animation=True,
+        frame_end=50)

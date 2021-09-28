@@ -1,12 +1,12 @@
 import bpy
 import bmesh
 from math import sin, cos, pi
-tau = 2*pi
+TAU = 2*pi
 import colorsys
 import os
 
 
-def removeObject(obj):
+def remove_object(obj):
     if obj.type == 'MESH':
         if obj.data.name in bpy.data.meshes:
             bpy.data.meshes.remove(obj.data)
@@ -17,7 +17,7 @@ def removeObject(obj):
         raise NotImplementedError('Other types not implemented yet besides \'MESH\'')
 
 
-def trackToConstraint(obj, target):
+def track_to_constraint(obj, target):
     constraint = obj.constraints.new('TRACK_TO')
     constraint.target = target
     constraint.track_axis = 'TRACK_NEGATIVE_Z'
@@ -29,16 +29,14 @@ def trackToConstraint(obj, target):
     return constraint
 
 
-def target(origin=(0,0,0)):
-    tar = bpy.data.objects.new('Target', None)
-    # bpy.context.scene.objects.link(tar)
-    bpy.context.collection.objects.link(tar)
-    tar.location = origin
-
-    return tar
+def create_target(origin=(0,0,0)):
+    target = bpy.data.objects.new('Target', None)
+    bpy.context.collection.objects.link(target)
+    target.location = origin
+    return target
 
 
-def camera(origin, target=None, lens=35, clip_start=0.1, clip_end=200, type='PERSP', ortho_scale=6):
+def create_camera(origin, target=None, lens=35, clip_start=0.1, clip_end=200, type='PERSP', ortho_scale=6):
     # Create object and camera
     camera = bpy.data.cameras.new("Camera")
     camera.lens = lens
@@ -51,45 +49,36 @@ def camera(origin, target=None, lens=35, clip_start=0.1, clip_end=200, type='PER
     # Link object to scene
     obj = bpy.data.objects.new("CameraObj", camera)
     obj.location = origin
-    # bpy.context.scene.objects.link(obj)
     bpy.context.collection.objects.link(obj)
     bpy.context.scene.camera = obj # Make this the current camera
 
-    if target: trackToConstraint(obj, target)
+    if target: 
+        track_to_constraint(obj, target)
     return obj
 
 
-def lamp(origin, type='POINT', energy=1, color=(1,1,1), target=None):
-    # Lamp types: 'POINT', 'SUN', 'SPOT', 'HEMI', 'AREA'
-    print('createLamp called')
+def create_light(origin, type='POINT', energy=1, color=(1,1,1), target=None):
+    # Light types: 'POINT', 'SUN', 'SPOT', 'HEMI', 'AREA'
     bpy.ops.object.add(type='LIGHT', location=origin)
     obj = bpy.context.object
     obj.data.type = type
     obj.data.energy = energy
     obj.data.color = color
 
-    if target: trackToConstraint(obj, target)
+    if target: 
+        track_to_constraint(obj, target)
     return obj
 
 
-def simpleScene(targetCoord, cameraCoord, sunCoord, lens=35):
-    print('createSimpleScene called')
+def simple_scene(target_coords, camera_coords, sun_coords, lens=35):
+    target = create_target(target_coords)
+    camera = create_camera(camera_coords, target, lens)
+    sun = create_light(sun_coords, 'SUN', target=target)
 
-    tar = target(targetCoord)
-    cam = camera(cameraCoord, tar, lens)
-    sun = lamp(sunCoord, 'SUN', target=tar)
-
-    return tar, cam, sun
+    return target, camera, sun
 
 
-def setAmbientOcclusion(ambient_occulusion=True, samples=5, blend_type='ADD'):
-    # blend_type options: 'ADD', 'MULTIPLY'
-    bpy.context.scene.world.light_settings.use_ambient_occlusion = ambient_occulusion
-    # bpy.context.scene.world.light_settings.ao_blend_type = blend_type
-    # bpy.context.scene.world.light_settings.samples = samples
-
-
-def setSmooth(obj, level=None, smooth=True):
+def set_smooth(obj, level=None, smooth=True):
     if level:
         # Add subsurf modifier
         modifier = obj.modifiers.new('Subsurf', 'SUBSURF')
@@ -102,10 +91,10 @@ def setSmooth(obj, level=None, smooth=True):
         p.use_smooth = smooth
 
 
-def rainbowLights(r=5, n=100, freq=2, energy=0.1):
+def rainbow_lights(r=5, n=100, freq=2, energy=0.1):
     for i in range(n):
         t = float(i)/float(n)
-        pos = (r*sin(tau*t), r*cos(tau*t), r*sin(freq*tau*t))
+        pos = (r*sin(TAU*t), r*cos(TAU*t), r*sin(freq*TAU*t))
 
         # Create lamp
         bpy.ops.object.add(type='LIGHT', location=pos)
@@ -120,8 +109,10 @@ def rainbowLights(r=5, n=100, freq=2, energy=0.1):
         obj.data.energy = energy
 
 
-def removeAll(type=None):
-    # Possible type: "MESH", "CURVE", "SURFACE", "META", "FONT", "ARMATURE", "LATTICE", "EMPTY", "CAMERA", "LIGHT"
+def remove_all(type=None):
+    # Possible type:
+    # "MESH", "CURVE", "SURFACE", "META", "FONT", "ARMATURE",
+    # "LATTICE", "EMPTY", "CAMERA", "LIGHT"
     if type:
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.select_by_type(type=type)
@@ -132,86 +123,71 @@ def removeAll(type=None):
         bpy.ops.object.delete(use_global=False)
 
 
-def simpleMaterial(diffuse_color):
+def create_material(base_color=(1, 1, 1, 1), metalic=0.0, roughness=0.5):
     mat = bpy.data.materials.new('Material')
 
-    # Diffuse
-    mat.diffuse_shader = 'LAMBERT'
-    mat.diffuse_intensity = 0.9
-    mat.diffuse_color = diffuse_color
+    if len(base_color) == 3:
+        base_color = list(base_color)
+        base_color.append(1)
 
-    # Specular
-    mat.specular_intensity = 0
+    mat.use_nodes = True
+    node = mat.node_tree.nodes[0]
+    node.inputs[0].default_value = base_color
+    node.inputs[4].default_value = metalic
+    node.inputs[7].default_value = roughness
 
     return mat 
-
-
-def falloffMaterial(diffuse_color):
-    mat = bpy.data.materials.new('FalloffMaterial')
-
-    # Diffuse
-    mat.diffuse_shader = 'LAMBERT'
-    mat.use_diffuse_ramp = True
-    mat.diffuse_ramp_input = 'NORMAL'
-    mat.diffuse_ramp_blend = 'ADD'
-    mat.diffuse_ramp.elements[0].color = (1, 1, 1, 1)
-    mat.diffuse_ramp.elements[1].color = (1, 1, 1, 0)
-    mat.diffuse_color = diffuse_color
-    mat.diffuse_intensity = 1.0
-
-    # Specular
-    mat.specular_intensity = 0.0
-
-    # Shading
-    mat.emit = 0.05
-    mat.translucency = 0.2
-
-    return mat
 
 
 def colorRGB_256(color):
     return tuple(pow(float(c)/255.0, 2.2) for c in color)
 
 
-def renderToFolder(renderFolder='rendering', renderName='render', resX=800, resY=800, resPercentage=100, animation=False, frame_end=None):
-    print('renderToFolder called')
-    scn = bpy.context.scene
-    scn.render.resolution_x = resX
-    scn.render.resolution_y = resY
-    scn.render.resolution_percentage = resPercentage
+def render(
+    render_folder='rendering',
+    render_name='render',
+    resolution_x=800,
+    resolution_y=800,
+    resolution_percentage=100,
+    animation=False,
+    frame_end=None,
+    render_engine='CYCLES'
+):
+    scene = bpy.context.scene
+    scene.render.resolution_x = resolution_x
+    scene.render.resolution_y = resolution_y
+    scene.render.resolution_percentage = resolution_percentage
+    scene.render.engine = render_engine
     if frame_end:
-        scn.frame_end = frame_end
-
-    print(bpy.context.space_data)
+        scene.frame_end = frame_end
 
     # Check if script is executed inside Blender
     if bpy.context.space_data is None:
         # Specify folder to save rendering and check if it exists
-        render_folder = os.path.join(os.getcwd(), renderFolder)
+        render_folder = os.path.join(os.getcwd(), render_folder)
         if(not os.path.exists(render_folder)):
             os.mkdir(render_folder)
 
         if animation:
             # Render animation
-            scn.render.filepath = os.path.join(
+            scene.render.filepath = os.path.join(
                 render_folder,
-                renderName)
+                render_name)
             bpy.ops.render.render(animation=True)
         else:
             # Render still frame
-            scn.render.filepath = os.path.join(
+            scene.render.filepath = os.path.join(
                 render_folder,
-                renderName + '.png')
+                render_name + '.png')
             bpy.ops.render.render(write_still=True)
 
 
-def bmeshToObject(bm, name='Object'):
-    mesh = bpy.data.meshes.new(name+'Mesh')
+def bmesh_to_object(bm, name='Object'):
+    mesh = bpy.data.meshes.new(name + 'Mesh')
     bm.to_mesh(mesh)
     bm.free()
 
     obj = bpy.data.objects.new(name, mesh)
-    bpy.context.scene.objects.link(obj)
-    bpy.context.scene.update()
+    bpy.context.scene.collection.objects.link(obj)
 
     return obj

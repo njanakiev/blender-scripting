@@ -1,5 +1,6 @@
 #frame files
 scripts/frames/
+scripts/rendering/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

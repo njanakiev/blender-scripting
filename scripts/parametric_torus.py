@@ -5,7 +5,7 @@ import utils
 
 
 # Create a function for the u, v surface parameterization from r0 and r1
-def torusSurface(r0, r1):
+def torus_surface(r0, r1):
     def surface(u, v):
         point = ((r0 + r1*cos(TAU*v))*cos(TAU*u), \
                  (r0 + r1*cos(TAU*v))*sin(TAU*u), \
@@ -13,8 +13,9 @@ def torusSurface(r0, r1):
         return point
     return surface
 
+
 # Create an object from a surface parameterization
-def createSurface(surface, n=10, m=10, origin=(0,0,0), name='Surface'):
+def create_surface(surface, n=10, m=10, origin=(0,0,0), name='Surface'):
     verts = list()
     faces = list()
 
@@ -29,10 +30,15 @@ def createSurface(surface, n=10, m=10, origin=(0,0,0), name='Surface'):
             verts.append(point)
 
             # Connect first and last vertices on the u and v axis
-            rowNext = (row + 1) % n
-            colNext = (col + 1) % m
+            row_next = (row + 1) % n
+            col_next = (col + 1) % m
             # Indices for each qued
-            faces.append(((col*n) + rowNext, (colNext*n) + rowNext, (colNext*n) + row, (col*n) + row))
+            faces.append((
+                (col*n) + row_next, 
+                (col_next*n) + row_next, 
+                (col_next*n) + row, 
+                (col*n) + row
+            ))
 
     print('verts : ' + str(len(verts)))
     print('faces : ' + str(len(faces)))
@@ -42,7 +48,7 @@ def createSurface(surface, n=10, m=10, origin=(0,0,0), name='Surface'):
     obj  = bpy.data.objects.new(name, mesh)
     obj.location = origin
     # Link object to scene
-    bpy.context.scene.objects.link(obj)
+    bpy.context.collection.objects.link(obj)
     # Create mesh from given verts and faces
     mesh.from_pydata(verts, [], faces)
     #Update mesh with new data
@@ -52,21 +58,29 @@ def createSurface(surface, n=10, m=10, origin=(0,0,0), name='Surface'):
 
 if __name__ == '__main__':
     # Remove all elements
-    utils.removeAll()
+    utils.remove_all()
 
     # Create camera
-    target = utils.target()
-    camera = utils.camera((-10, -10, 10), target)
+    target = utils.create_target()
+    camera = utils.create_camera((-12, -12, 12), target, lens=50)
 
     # Set cursor to (0, 0, 0)
-    bpy.context.scene.cursor_location = (0, 0, 0)
+    bpy.context.scene.cursor.location = (0, 0, 0)
 
     # Create lamps
-    utils.rainbowLights(10, 300, 3)
+    utils.rainbowLights(10, 100, 3, energy=300)
 
     # Create object
-    torus = createSurface(torusSurface(4, 2), 20, 20)
-    utils.setSmooth(torus, 2)
+    obj = create_surface(torus_surface(4, 2), 20, 20)
 
+    # Create material
+    mat = utils.create_material(metalic=0.5)
+    obj.data.materials.append(mat)
+
+    # Smooth surface and add subsurf modifier
+    utils.set_smooth(obj, 2)
+    
     # Render scene
-    utils.renderToFolder('rendering', 'parametric_torus', 500, 500)
+    utils.render(
+        'rendering', 'parametric_torus', 500, 500,
+        render_engine='CYCLES')

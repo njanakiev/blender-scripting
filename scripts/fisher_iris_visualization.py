@@ -63,7 +63,7 @@ def load_iris():
     return X, y, labels
 
 
-def createScatter(X, y, size=0.25):
+def create_scatter(X, y, size=0.25):
     labelIndices = set(y)
     colors = [(1, 0, 0, 1), (0, 1, 0, 1), (0, 0, 1, 1), \
               (1, 1, 0, 1), (1, 0, 1, 1), (0, 1, 1, 1)]
@@ -110,83 +110,77 @@ def createScatter(X, y, size=0.25):
 
         objects.append(obj)
 
+    return objects
 
-def createLabels(X, y, labels, cameraObj=None):
-    labelIndices = set(y)
+
+def create_labels(X, y, labels, camera=None):
+    label_indices = set(y)
     objects = []
 
     # Draw labels
-    for labelIdx in labelIndices:
+    for label_idx in label_indices:
         center = np.sum([x for x, idx in zip(X, y) \
-            if idx == labelIdx], axis=0)
-        counts = (y == labelIdx).sum()
+            if idx == label_idx], axis=0)
+        counts = (y == label_idx).sum()
         center = Vector(center) / counts
 
-        label = labels[labelIdx]
-        fontCurve = bpy.data.curves.new(type="FONT", name=label)
-        fontCurve.body = label
-        fontCurve.align_x = 'CENTER'
-        fontCurve.align_y = 'BOTTOM'
-        fontCurve.size = 0.6
+        label = labels[label_idx]
+        font_curve = bpy.data.curves.new(type="FONT", name=label)
+        font_curve.body = label
+        font_curve.align_x = 'CENTER'
+        font_curve.align_y = 'BOTTOM'
+        font_curve.size = 0.6
 
-        obj = bpy.data.objects.new("Label {}".format(label), fontCurve)
+        obj = bpy.data.objects.new("Label {}".format(label), font_curve)
         obj.location = center + Vector((0, 0, 0.8))
         obj.rotation_mode = 'AXIS_ANGLE'
         obj.rotation_axis_angle = (pi/2, 1, 0, 0)
-        # bpy.context.scene.objects.link(obj)
         bpy.context.collection.objects.link(obj)
 
-        if cameraObj is not None:
+        if camera is not None:
             constraint = obj.constraints.new('LOCKED_TRACK')
-            constraint.target = cameraObj
+            constraint.target = camera
             constraint.track_axis = 'TRACK_Z'
             constraint.lock_axis = 'LOCK_Y'
 
         objects.append(obj)
         bpy.context.scene.collection.objects.link(obj)
 
-    # bpy.context.scene.update()
-    # bpy.context.scene.collection.objects.link(objects)
-
     return objects
 
 
 if __name__ == '__main__':
     # Remove all elements
-    utils.removeAll()
-
-    # Set ambient occlusion
-    utils.setAmbientOcclusion()
+    utils.remove_all()
 
     # Create camera and lamp
-    targetObj, cameraObj, lampObj = utils.simpleScene(
+    target, camera, light = utils.simple_scene(
         (0, 0, 0), (6, 6, 3.5), (-5, 5, 10))
 
     # Make target as parent of camera
-    cameraObj.parent = targetObj
+    camera.parent = target
 
     # Set number of frames
     bpy.context.scene.frame_end = 50
 
     # Animate rotation of target by keyframe animation
-    targetObj.rotation_mode = 'AXIS_ANGLE'
-    targetObj.rotation_axis_angle = (0, 0, 0, 1)
-    targetObj.keyframe_insert(data_path='rotation_axis_angle', index=-1,
+    target.rotation_mode = 'AXIS_ANGLE'
+    target.rotation_axis_angle = (0, 0, 0, 1)
+    target.keyframe_insert(data_path='rotation_axis_angle', index=-1,
         frame=bpy.context.scene.frame_start)
-    targetObj.rotation_axis_angle = (2*pi, 0, 0, 1)
+    target.rotation_axis_angle = (2*pi, 0, 0, 1)
     # Set last frame to one frame further to have an animation loop
-    targetObj.keyframe_insert(data_path='rotation_axis_angle', index=-1,
+    target.keyframe_insert(data_path='rotation_axis_angle', index=-1,
         frame=bpy.context.scene.frame_end + 1)
 
     # Change each created keyframe point to linear interpolation
-    for fcurve in targetObj.animation_data.action.fcurves:
+    for fcurve in target.animation_data.action.fcurves:
         for keyframe in fcurve.keyframe_points:
             keyframe.interpolation = 'LINEAR'
 
     X, y, labels = load_iris()
-
-    createScatter(X, y)
-    createLabels(X, y, labels, cameraObj)
+    create_scatter(X, y)
+    label_objects = create_labels(X, y, labels, camera)
 
     # Create a grid
     bpy.ops.mesh.primitive_grid_add(
@@ -194,17 +188,16 @@ if __name__ == '__main__':
         location=(0, 0, 0),
         x_subdivisions=15,
         y_subdivisions=15)
+    grid_obj = bpy.context.active_object
 
-    grid = bpy.context.active_object
+    # Add wireframe modifier
+    modifier = grid_obj.modifiers.new("Wireframe", "WIREFRAME")
+    modifier.thickness = 0.05
 
     # Create grid material
-    gridMat = bpy.data.materials.new('GridMaterial')
-    # gridMat.type = 'WIRE'
-    # gridMat.use_transparency = True
-    # gridMat.alpha = 0.3
+    mat = utils.create_material()
+    grid_obj.data.materials.append(mat)
 
-    grid.data.materials.append(gridMat)
-
-
-    utils.renderToFolder('frames', 'fisher_iris_visualization', 500, 500,
-        animation=True)
+    utils.render(
+        'frames', 'fisher_iris_visualization', 512, 512,
+        render_engine='BLENDER_EEVEE', animation=True)

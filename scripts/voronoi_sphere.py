@@ -6,23 +6,23 @@ from mathutils import Vector, Matrix
 import utils
 
 
-def VoronoiSphere(bm, points, r=2, offset=0.02, numMaterials=1):
+def VoronoiSphere(bm, points, r=2, offset=0.02, num_materials=1):
     # Calculate 3D Voronoi diagram
     vor = spatial.Voronoi(points)
 
-    facesDict = {}
+    faces_dict = {}
     for (idx_p0, idx_p1), ridge_vertices in zip(vor.ridge_points, vor.ridge_vertices):
         if -1 in ridge_vertices: continue
-        if idx_p0 not in facesDict:
-            facesDict[idx_p0] = []
-        if idx_p1 not in facesDict:
-            facesDict[idx_p1] = []
+        if idx_p0 not in faces_dict:
+            faces_dict[idx_p0] = []
+        if idx_p1 not in faces_dict:
+            faces_dict[idx_p1] = []
 
-        facesDict[idx_p0].append(ridge_vertices)
-        facesDict[idx_p1].append(ridge_vertices)
+        faces_dict[idx_p0].append(ridge_vertices)
+        faces_dict[idx_p1].append(ridge_vertices)
 
-    for idx_point in facesDict:
-        region = facesDict[idx_point]
+    for idx_point in faces_dict:
+        region = faces_dict[idx_point]
         center = Vector(vor.points[idx_point])
         if len(region) <= 1: continue
 
@@ -37,7 +37,7 @@ def VoronoiSphere(bm, points, r=2, offset=0.02, numMaterials=1):
 
         if not skip:
             vertsDict = {}
-            material_index = np.random.randint(numMaterials)
+            material_index = np.random.randint(num_materials)
 
             for faces in region:
                 verts = []
@@ -62,13 +62,10 @@ if __name__ == '__main__':
     print(__file__)
 
     # Remove all elements
-    utils.removeAll()
-
-    # Set ambient occlusion
-    utils.setAmbientOcclusion()
+    utils.remove_all()
 
     # Create camera and lamp
-    utils.simpleScene((0, 0, 0), (6, 0, 0), (-5, 5, 10))
+    utils.simple_scene((0, 0, 0), (5.5, 0, 0), (-5, 5, 10))
 
     # Color palette
     # http://www.colourlovers.com/palette/1189317/Rock_Mint_Splash
@@ -77,19 +74,22 @@ if __name__ == '__main__':
     palette = [utils.colorRGB_256(color) for color in palette]
 
     # Set background color of scene
-    bpy.context.scene.world.horizon_color = palette[0]
+    bpy.context.scene.world.use_nodes = False
+    bpy.context.scene.world.color = palette[0]
 
     # Create Voronoi Sphere
     n, r = 2000, 2
     points = (np.random.random((n, 3)) - 0.5)*2*r
     bm = bmesh.new()
-    VoronoiSphere(bm, points, r, numMaterials=len(palette)-1)
-    obj = utils.bmeshToObject(bm)
+    VoronoiSphere(bm, points, r, num_materials=len(palette)-1)
+    obj = utils.bmesh_to_object(bm)
 
     # Apply materials to object
     for color in palette[1:]:
-        mat = utils.simpleMaterial(color)
+        mat = utils.create_material(color)
         obj.data.materials.append(mat)
 
     # Render scene
-    utils.renderToFolder('rendering', 'voronoi_sphere', 500, 500)
+    utils.render(
+        'rendering', 'voronoi_sphere', 512, 512,
+        render_engine='CYCLES')
